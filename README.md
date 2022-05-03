@@ -85,9 +85,9 @@ Then you would get three directory `fop0_result`, `fop2_result` and `fop4_result
 
 * cmp_noverify.log: differences in HotSpot, OpenJ9, Zulu and GraalVM **without** verification
 
-## Table 2
+## Table 3
 
-To get data in Table 2, one or more mutation logs are needed. For example,
+To get data in Table 3, one or more mutation logs are needed. For example,
 
 ```bash
 java -cp ehcbuilder-jar-with-dependencies.jar script.CountNodes2 ehcrandom.log ehcbuilder.log ehcbuilder_opt.log
@@ -95,9 +95,9 @@ java -cp ehcbuilder-jar-with-dependencies.jar script.CountNodes2 ehcrandom.log e
 
 will collect all nodes generated last step.
 
-## Table 3
+## Table 4
 
-To get data in Table 3, one or more mutation logs are needed. For example,
+To get data in Table 4, one or more mutation logs are needed. For example,
 
 ```bash
 java -cp ehcbuilder-jar-with-dependencies.jar script.CountScenarios ehcrandom.log ehcbuilder.log ehcbuilder_opt.log
@@ -105,9 +105,9 @@ java -cp ehcbuilder-jar-with-dependencies.jar script.CountScenarios ehcrandom.lo
 
 will collect all chains generated last step.
 
-## Table 4
+## Table 5
 
-To get coverage in Table 4, one mutator directory is needed. For example,
+To get coverage in Table 5, one mutator directory is needed. For example,
 
 ```bash
 ./getJVMCovs.sh fop0
@@ -115,9 +115,9 @@ To get coverage in Table 4, one mutator directory is needed. For example,
 
 will collect JVM code coverage covered by EHCRandom
 
-## Table 5
+## Table 6
 
-To get data in Table 5, one or more mutator directories are needed. For example, 
+To get data in Table 6, one or more mutator directories are needed. For example, 
 
 ```bash 
 ./getThrowCatchCoverage.sh fop0 fop2 fop4
