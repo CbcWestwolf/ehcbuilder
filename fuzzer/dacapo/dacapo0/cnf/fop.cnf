@@ -1,0 +1,27 @@
+benchmark fop
+  class org.dacapo.harness.Fop
+  thread-model single
+  jars "fop.jar", "avalon-framework-api-4.3.1.jar", "avalon-framework-impl-4.3.1.jar", "batik-all-1.9-fop.jar", "commons-io-1.3.1.jar", "commons-logging-1.0.4.jar", "fontbox-2.0.4.jar", "serializer-2.7.2.jar", "servlet-2.2.jar", "xalan-2.7.2.jar", "xercesImpl-2.9.1.jar", "xml-apis-1.3.04.jar", "xml-apis-ext-1.3.04.jar", "xmlgraphics-commons-2.2.jar" ;
+
+/*
+ * 'small' uses debug mode ("-d"), which puts current stats in the output,
+ * so we don't use stdout to validate small.
+ */
+size small args "-q", "${SCRATCH}/fop/readme.fo", "-pdf", "${SCRATCH}/readme.pdf"
+  output stdout digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709,
+         stderr digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709;
+
+size default args "-q", "${SCRATCH}/fop/test.fo", "-ps", "${SCRATCH}/test.ps"
+  output stdout digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709,
+         stderr digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709;
+
+description
+  short		"An output-independent print formatter",
+  long		"fop takes an XSL-FO file, parses it and formats it, generating a postscript file",
+  copyright	"Copyright (C) 1999-2006 The Apache Software Foundation",
+  author 	"Apache Software Foundation",
+  license	"Apache Public License",
+  url        "http://xmlgraphics.apache.org/fop/",
+  version	"2.2",
+  repeats	"Single iteration, renders a single XSL-FO file",
+  threads       "Single threaded";
