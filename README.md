@@ -45,7 +45,7 @@ This repository contains scripts and jar for running EHCBuilder and EHCRandom.
     		└── runOnJVMs.sh
 ```
 
-* fuzzer: contains all fuzzer ( EHCRandom, EHCBuilder, EHCBuilder with optimization). 
+* fuzzer: contains all fuzzer (EHCRandom, EHCBuilder, EHCBuilder with optimization). 
   * dacapo: contains all the scripts and execution trace for running EHCBuilder on Dacapo
   * scimark2: contains all the scripts and execution trace for running EHCBuilder on Scimark2.0
 * experiments: contains all scripts for experiments in Paper
@@ -54,8 +54,8 @@ This repository contains scripts and jar for running EHCBuilder and EHCRandom.
 
 * `zsh` is needed for running the scripts.
 
-* For specifying the benchmark of dacapo, you need to specify the benchmark in `DacapoArg` in `config.sh`.  Five benchmarks`avrora batik h2 fop xalan` are available.
-* For differential testing, you need to specify JVMs location in `jvmPaths` arrays in `config.sh` in `experiments`.
+* For specifying the benchmark of dacapo, you need to specify the benchmark in `DacapoArg` in `config.sh`. 12 benchmarks `avrora batik eclipse h2 fop jython luindex pmd sunflow tradebeans tradesoap xalan` are available.
+* For differential testing, you need to specify JVMs name in `jvms` and JVMs location in `jvmPaths` arrays in `config.sh` in `experiments`.
 * For collecting JVM coverage using *gcov*, you need to specify HotSpot location in `projectDir` in `getJVMCov.sh` in `experiments`
 
 # How to run fuzzer on dacapo

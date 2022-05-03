@@ -11,7 +11,7 @@ TOOL=$DacapoRoot'/ehcbuilder-jar-with-dependencies.jar'
 DacapoLib=$DacapoRoot'/lib' # 这个 lib 文件夹中有一个文件夹 jar，里面是 dacapo 中 jar 文件夹中的所有 jar 包
 
 # 超时时间(秒)
-TIMEOUT=180
+TIMEOUT=300
 
 # 插桩过的 benchmark 目录
 DacapoDir='dacapo'
@@ -43,7 +43,7 @@ hotspotArgs=(
   -noverify
 )
 
-# 目前是 avrora batik h2 fop xalan 这几个可用
+# 目前是 avrora batik eclipse h2 fop jython luindex pmd sunflow tradebeans tradesoap xalan 这几个可用
 DacapoArg='h2'
 
 CHAIN_LENGTH=10 # 链的长度
@@ -559,4 +559,42 @@ function countTestDir() {
     nextTestNum=$((nextTestNum + 1))
   }
   echo $nextTestNum
+}
+
+# 统计时间的哈希表, key 为项目(字符串)，value 为秒数(整型)
+typeset -A time_count
+time_count=('InsertException' 0
+				'RethrowException' 0
+				'AddCauseAndSuppressed' 0
+				'InsertGoto' 0
+				'ModifyException' 0
+				'RunMutant' 0
+				'CheckBody' 0
+				'LogFormatter' 0
+				'ExceptionSceneCoverage' 0
+				'ThrowCatchCoverage' 0
+				'FitnessFunction' 0
+)
+
+# param: item 要统计耗时的对象
+function startTimeCount() {
+	startTime=`date +'%Y-%m-%d %H:%M:%S'`
+	startSecond=$(date --date="$startTime" +%s);
+}
+
+# param: item 要统计耗时的对象
+function endTimeCount() {
+	endTime=`date +'%Y-%m-%d %H:%M:%S'`
+	endSecond=$(date --date="$endTime" +%s);
+	if (($+time_count[$1])) { # 若统计的对象不在，直接返回
+		local timeCount=$((endSecond-startSecond))
+		time_count[$1]=$((time_count[$1]+timeCount))
+  }
+}
+
+# 打印所有项目的耗时
+function printTimeCount() {
+	for k v (${(kv)time_count}) {
+		echo "$k spends $v seconds"
+	}
 }

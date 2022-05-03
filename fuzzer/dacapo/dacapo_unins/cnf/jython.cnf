@@ -1,0 +1,27 @@
+benchmark jython
+  class org.dacapo.harness.Jython
+  thread-model single
+  jars "jython.jar", "antlr-3.1.3.jar", "asm-3.1.jar", "asm-commons-3.1.jar", "constantine.jar", "guava-r07.jar", "jaffl.jar", "jline-0.9.95-SNAPSHOT.jar", "jnr-posix.jar";
+
+size small args "${SCRATCH}/jython/sieve.py","50"
+  output stdout digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709,
+         stderr digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709;
+
+size default args "${SCRATCH}/jython/pybench/pybench.py", "--with-gc", "--debug", "-n", "1", "-C", "0", "-w", "20"
+  output stdout digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709,
+         stderr digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709;
+
+size large args "${SCRATCH}/jython/pybench/pybench.py", "--with-gc", "--debug", "-n", "4", "-C", "0", "-w", "10"
+  output stdout digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709,
+         stderr digest 0xda39a3ee5e6b4b0d3255bfef95601890afd80709;
+
+description
+  short		"A python interpreter written in Java",
+  long		"jython executes (interprets) the pybench benchmark or a small python program",
+  copyright	"Copyright (c) Python Software Foundation",
+  author	"Jim Hugunin and Barry Warsaw",
+  license	"The Jython License.",
+  url		"http://www.jython.org/",
+  version	"2.5.1",
+  threads       "Single-threaded.",
+  repeats	"Single iteration runs a single iteration of the pybench python benchmark";

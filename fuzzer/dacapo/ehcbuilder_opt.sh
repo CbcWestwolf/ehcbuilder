@@ -14,8 +14,8 @@
 source config.sh
 
 # 1. 检查是否已经完成插桩
-# 检查 $DacapoDir"0" _DTJVM$DacapoArg.log id-class-method.txt 是否存在
-for item ($DacapoDir"0" _DTJVM$DacapoArg.log id-class-method.txt $DacapoDir"_unins") {
+# 检查 $BenchmarkDir"0" _DTJVM$BenchmarkArg.log 是否存在
+for item ($BenchmarkDir"0" _DTJVM$BenchmarkArg.log) {
   if [[ ! -e $item ]] {
     echo $item' not exist'
     exit 1
@@ -24,7 +24,7 @@ for item ($DacapoDir"0" _DTJVM$DacapoArg.log id-class-method.txt $DacapoDir"_uni
 
 # 在这里获取各种 base 覆盖率，用于指导变异
 # 用法参考这里：https://unix.stackexchange.com/questions/460792/split-zsh-array-from-subshell-by-linebreak
-array=(${(ps:\n:)"$(java -cp $TOOL script.ExceptionSceneCoverage $DacapoDir"0" _DTJVM$DacapoArg.log)"})
+array=(${(ps:\n:)"$(java -cp $TOOL script.ExceptionSceneCoverage $BenchmarkDir"0" _DTJVM$BenchmarkArg.log)"})
 baseStructureNum=$array[1]
 baseScenarioNum=$array[2]
 baseStructures=$array[3]
@@ -34,17 +34,17 @@ echo "baseScenarioNum: $baseScenarioNum"
 echo "baseStructures: $baseStructures"
 echo "baseScenarios: $baseScenarios"
 
-rm -rf scratch >/dev/null 2>&1
+rm -rf $BenchmarkTrash >/dev/null 2>&1
 
 # 2. 进行变异
 
-# 创建 $DacapoArg"4" 目录
-if [[ -d $DacapoArg"4" ]] {
-  rm -rf $DacapoArg"4" >/dev/null 2>&1
+# 创建 $BenchmarkArg"4" 目录
+if [[ -d $BenchmarkArg"4" ]] {
+  rm -rf $BenchmarkArg"4" >/dev/null 2>&1
 }
-mkdir $DacapoArg"4"
+mkdir $BenchmarkArg"4"
 
-cd $DacapoArg"4"
+cd $BenchmarkArg"4"
 for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
   [[ -d $epoch ]] && continue
 
@@ -53,18 +53,18 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
 
   echo -e '\n========================= Epoch '$epoch' =========================' # -e 表示启用转义功能
 
-  leaf=$(countLeaf $DacapoDir $baseStructureNum)
-  if [[ ! -e $DacapoDir$baseStructureNum'.'$leaf || ! -e _DTJVM$baseStructureNum'.'$leaf.log ]] {
-    echo "Copy $DacapoRoot/$DacapoDir0 and _DTJVM$DacapoArg.log to current dir"
-    rm -rf $DacapoDir$baseStructureNum'.'$leaf >/dev/null 2>&1
-    cp -r $DacapoRoot/$DacapoDir"0" $DacapoDir$baseStructureNum'.'$leaf
-    cp "$DacapoRoot/_DTJVM$DacapoArg.log" _DTJVM$baseStructureNum'.'$leaf.log
+  leaf=$(countLeaf $BenchmarkDir $baseStructureNum)
+  if [[ ! -e $BenchmarkDir$baseStructureNum'.'$leaf || ! -e _DTJVM$baseStructureNum'.'$leaf.log ]] {
+    echo "Copy $BenchmarkRoot/$BenchmarkDir0 and _DTJVM$BenchmarkArg.log to current dir"
+    rm -rf $BenchmarkDir$baseStructureNum'.'$leaf >/dev/null 2>&1
+    cp -r $BenchmarkRoot/$BenchmarkDir"0" $BenchmarkDir$baseStructureNum'.'$leaf
+    cp "$BenchmarkRoot/_DTJVM$BenchmarkArg.log" _DTJVM$baseStructureNum'.'$leaf.log
   }
 
-  # 一个 Forest 由各个 $DacapoDir$depth.$leaf 或者 $DacapoDir"Test"$num 组成
-  # 对于 $DacapoDir$depth.$leaf：其中 $depth 从 0 开始，表示植入的 exception 的数量; $leaf 每一层从 0 开始，表示植入 goto 或者 Modify Exception 之后的变种
-  #      $DacapoDir$depth.$leaf 都可以作为 seed
-  # $DacapoDir"Test"$num 不能作为 seed
+  # 一个 Forest 由各个 $BenchmarkDir$depth.$leaf 或者 $BenchmarkDir"Test"$num 组成
+  # 对于 $BenchmarkDir$depth.$leaf：其中 $depth 从 0 开始，表示植入的 exception 的数量; $leaf 每一层从 0 开始，表示植入 goto 或者 Modify Exception 之后的变种
+  #      $BenchmarkDir$depth.$leaf 都可以作为 seed
+  # $BenchmarkDir"Test"$num 不能作为 seed
 
   curSeedNum=0                       # 作为 mutation 的种子
   curTestNum=1                       # 不作为 mutation 的种子, 但可以进行 diff testing
@@ -84,34 +84,34 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
     #   }
 
     # 选择下个要变易的目录
-    tempInfo=$(java -cp $TOOL mutation.SelectNodeOnForest $DacapoDir)
+    tempInfo=$(java -cp $TOOL mutation.SelectNodeOnForest $BenchmarkDir)
     array=(${=tempInfo})
     if (( $#array != 2 )) {
       echo 'Not get any seed: '$tempInfo
-      cd ../.. # exit $chain; exit $DacapoArg"2"
+      cd ../.. # exit $chain; exit $BenchmarkArg"2"
       exit 1
     }
-    # 选中 $DacapoDir$selectedDepth.$selectedLeaf 进行变异
+    # 选中 $BenchmarkDir$selectedDepth.$selectedLeaf 进行变异
     selectedDepth=$array[1]
     selectedLeaf=$array[2]
-    if [[ ! -e $DacapoDir$selectedDepth.$selectedLeaf ]] {
-      echo $DacapoDir$selectedDepth.$selectedLeaf' not exists'
-      cd ../.. # exit $chain; exit $DacapoArg"2"
+    if [[ ! -e $BenchmarkDir$selectedDepth.$selectedLeaf ]] {
+      echo $BenchmarkDir$selectedDepth.$selectedLeaf' not exists'
+      cd ../.. # exit $chain; exit $BenchmarkArg"2"
       exit 1
     }
-    array=(${(ps:\n:)"$(java -cp $TOOL script.ExceptionSceneCoverage $DacapoDir$selectedDepth.$selectedLeaf _DTJVM$selectedDepth.$selectedLeaf.log run$selectedDepth.$selectedLeaf.log)"})
+    array=(${(ps:\n:)"$(java -cp $TOOL script.ExceptionSceneCoverage $BenchmarkDir$selectedDepth.$selectedLeaf _DTJVM$selectedDepth.$selectedLeaf.log run$selectedDepth.$selectedLeaf.log)"})
     lastStructureNum=$array[1]
     lastScenarioNum=$array[2]
     lastStructures=$array[3]
     lastScenarios=$array[4]
-    echo "Select $DacapoDir$selectedDepth.$selectedLeaf as seed"
+    echo "Select $BenchmarkDir$selectedDepth.$selectedLeaf as seed"
 
     # 确定 Mutators Combination 的数量
     N=$(generateRandomNum 5) # N = [0, 4]
     N=$((N+1))                # N = [1, 5]
-    rm -rf lastMutant curMutant run.log scratch >/dev/null 2>&1
-    cp -r $DacapoDir$selectedDepth.$selectedLeaf curMutant
-    nextSteps=(${(ps:\n:)"$(java -cp $TOOL mutation.Guidance $DacapoDir$selectedDepth.$selectedLeaf _DTJVM$selectedDepth.$selectedLeaf.log $N)"})
+    rm -rf lastMutant curMutant run.log >/dev/null 2>&1
+    cp -r $BenchmarkDir$selectedDepth.$selectedLeaf curMutant
+    nextSteps=(${(ps:\n:)"$(java -cp $TOOL mutation.Guidance $BenchmarkDir$selectedDepth.$selectedLeaf _DTJVM$selectedDepth.$selectedLeaf.log $N)"})
     echo "nextSteps:"
     echo $nextSteps
     if (( $N != $#nextSteps )) {
@@ -139,28 +139,32 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
       if [[ ( $nextStep == *OnCaller || $nextStep == *OnSpot ) 
           && ( $nextStep == Ex* || $nextStep == Im* ) ]] { 
 
+        startTimeCount            
         # testThrow 并获取信息
         echo -e "
         testThrow: {
           Args: {
             lastIndex:        $selectedDepth.$selectedLeaf
-            prefix:           $DacapoDir,
+            prefix:           $BenchmarkDir,
             app:              Harness,
-            args:             \"$DacapoArg\",
+            args:             \"$BenchmarkArg\",
             rethrow:          false
           }"
-        tempInfo=$(testThrow $selectedDepth.$selectedLeaf $DacapoDir Harness "$DacapoArg" "false")
+        tempInfo=$(testThrow $selectedDepth.$selectedLeaf $BenchmarkDir Harness "$BenchmarkArg" "false")
         retVal=$? # 每一条语句都有一个返回值, 所以一定要在这里先保存返回值
         if (( $retVal == 1 )) {
           echo "Function testThrow wrong arguments"
+          endTimeCount InsertException
           exit 1
         } elif (( $retVal == 2 )) {
           echo "Used up times and not found exception in error.txt"
+          endTimeCount InsertException
           continue
         } 
         array=(${=tempInfo})
         if (( $#array != 4 )) {
           echo "testThrow return wrong: "$tempInfo
+          endTimeCount InsertException
           continue
         }
         throwMethodID=$array[1]     # 加入 'throw' 的 methodID
@@ -185,29 +189,33 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
             throwMethodName:  $throwMethodName,
             throwMethodID:    $throwMethodID,
             throwStmtID:      $throwStmtID,
-            prefix:           $DacapoDir,
+            prefix:           $BenchmarkDir,
             useCounter:       true,
             nextStep:         $nextStep
           }"
         ThrowCatchInfo=$(
           insertThrowCatch $selectedDepth.$selectedLeaf $throwClassName \
-            $throwMethodName $throwMethodID $throwStmtID $DacapoDir "true" $nextStep
+            $throwMethodName $throwMethodID $throwStmtID $BenchmarkDir "true" $nextStep
         )
         retVal=$?
         if (( $retVal == 1 )) {
           echo "error.txt shows that only one method in call stack"
+          endTimeCount InsertException
           break
         } elif (( $retVal == 2 )) {
           echo "ParseWrap shows no NewException"
+          endTimeCount InsertException
           continue
         } elif (( $retVal != 0 )) {
           echo "ThrowAndCatch run error"
           echo "tempInfo in testThrow $ThrowCatchInfo"
+          endTimeCount InsertException
           continue
         }
         array=(${=ThrowCatchInfo})
         if (( $#array != 8 )) {
           echo "insertThrowCatch return wrong: "$ThrowCatchInfo
+          endTimeCount InsertException
           continue
         }
         throwStmtID=$array[1]
@@ -230,38 +238,44 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
             chosenException:  $chosenException
           }
         }"
+        endTimeCount InsertException
 
         # 将 mutate 得到的 class 文件移动到原目录中
         rm -rf temp >/dev/null 2>&1
         mv sootOutput temp
-        cp -r $DacapoDir$selectedDepth.$selectedLeaf sootOutput # 注意这里在复制前 sootOutput 不存在, 所以 $DacapoDir$selectedDepth.$selectedLeaf 不需要加 /*
+        cp -r $BenchmarkDir$selectedDepth.$selectedLeaf sootOutput # 注意这里在复制前 sootOutput 不存在, 所以 $BenchmarkDir$selectedDepth.$selectedLeaf 不需要加 /*
         rsync -a temp/ sootOutput
         rm -rf temp >/dev/null 2>&1
       
       } elif [[ $nextStep == "RethrowException" ]] {
+
+        startTimeCount
 
         # testThrow 并获取信息
         echo -e "
         testThrow: {
           Args: {
             lastIndex:        $selectedDepth.$selectedLeaf
-            prefix:           $DacapoDir,
+            prefix:           $BenchmarkDir,
             app:              Harness,
-            args:             \"$DacapoArg\",
+            args:             \"$BenchmarkArg\",
             rethrow:          true
           }"
-        tempInfo=$(testThrow $selectedDepth.$selectedLeaf $DacapoDir Harness "$DacapoArg" "true")
+        tempInfo=$(testThrow $selectedDepth.$selectedLeaf $BenchmarkDir Harness "$BenchmarkArg" "true")
         retVal=$? # 每一条语句都有一个返回值, 所以一定要在这里先保存返回值
         if (( $retVal == 1 )) {
           echo "Function testThrow wrong arguments"
+          endTimeCount RethrowException
           exit 1
         } elif (( $retVal == 2 )) {
           echo "Used up times and not found exception in error.txt"
+          endTimeCount RethrowException
           continue
         } 
         array=(${=tempInfo})
         if (( $#array != 4 )) {
           echo "testThrow return wrong: "$tempInfo
+          endTimeCount RethrowException
           continue
         }
         throwMethodID=$array[1]     # 加入 'throw' 的 methodID
@@ -286,28 +300,32 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
             throwMethodName:  $throwMethodName,
             throwMethodID:    $throwMethodID,
             throwStmtID:      $throwStmtID,
-            prefix:           $DacapoDir
+            prefix:           $BenchmarkDir
             useCounter:       false
           }"
         ThrowCatchInfo=$(
           insertThrowCatch $selectedDepth.$selectedLeaf $throwClassName \
-            $throwMethodName $throwMethodID $throwStmtID $DacapoDir "false"
+            $throwMethodName $throwMethodID $throwStmtID $BenchmarkDir "false"
         )
         retVal=$?
         if (( $retVal == 1 )) {
           echo "error.txt shows that only one method in call stack"
+          endTimeCount RethrowException
           break
         } elif (( $retVal == 2 )) {
           echo "ParseWrap shows no NewException"
+          endTimeCount RethrowException
           continue
         } elif (( $retVal != 0 )) {
           echo "ThrowAndCatch run error"
           echo "tempInfo in testThrow $ThrowCatchInfo"
+          endTimeCount RethrowException
           continue
         }
         array=(${=ThrowCatchInfo})
         if (( $#array != 8 )) {
           echo "insertThrowCatch return wrong: "$ThrowCatchInfo
+          endTimeCount RethrowException
           continue
         }
         throwStmtID=$array[1]
@@ -330,19 +348,22 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
             chosenException:  $chosenException
           }
         }"
+        endTimeCount RethrowException
 
         # 将 mutate 得到的 class 文件移动到原目录中
         rm -rf temp >/dev/null 2>&1
         mv sootOutput temp
-        cp -r $DacapoDir$selectedDepth.$selectedLeaf sootOutput # 注意这里在复制前 sootOutput 不存在, 所以 $DacapoDir$selectedDepth.$selectedLeaf 不需要加 /*
+        cp -r $BenchmarkDir$selectedDepth.$selectedLeaf sootOutput # 注意这里在复制前 sootOutput 不存在, 所以 $BenchmarkDir$selectedDepth.$selectedLeaf 不需要加 /*
         rsync -a temp/ sootOutput
         rm -rf temp >/dev/null 2>&1
 
       } elif [[ $nextStep == "AddCauseAndSuppressed" ]] {
 
-        cp -r $DacapoDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
+        cp -r $BenchmarkDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
 
-        tempInfo=$(java -cp $TOOL mutation.AddCauseOrSuppressed $DacapoDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf)
+        startTimeCount
+        tempInfo=$(java -cp $TOOL mutation.AddCauseOrSuppressed $BenchmarkDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf)
+        endTimeCount AddCauseAndSuppressed
         echo $tempInfo
 
         if [[ $tempInfo == Error* ]] {
@@ -351,8 +372,10 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
 
       } elif [[ $nextStep == "InsertGoto" ]] {
 
-        cp -r $DacapoDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
-        tempInfo=$(java -cp $TOOL mutation.InsertGoto $DacapoDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf "true")
+        cp -r $BenchmarkDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
+        startTimeCount
+        tempInfo=$(java -cp $TOOL mutation.InsertGoto $BenchmarkDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf "true")
+        endTimeCount InsertGoto
         array=(${=tempInfo})
         if [[ $#array != "3" || $tempInfo == Error* ]] {
           echo "InsertGoto return "$tempInfo
@@ -372,8 +395,10 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
 
       } elif [[ $nextStep == "ModifyException" ]] {
 
-        cp -r $DacapoDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
-        modifyInfo=$(java -cp $TOOL mutation.ModifyException $DacapoDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf)
+        cp -r $BenchmarkDir$selectedDepth.$selectedLeaf sootOutput # 结果先暂存在 sootOutput 中
+        startTimeCount
+        modifyInfo=$(java -cp $TOOL mutation.ModifyException $BenchmarkDir$selectedDepth.$selectedLeaf $selectedDepth.$selectedLeaf)
+        endTimeCount ModifyException
         array=(${=modifyInfo})
         if (( $#array < 2 || $#array > 50 )) {
           echo "ModifyException return wrong: "$modifyInfo
@@ -392,7 +417,9 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
       }
 
       echo "Check Bodies in sootOutput"
+      startTimeCount
       tempInfo=$(java -cp $TOOL script.CheckBody sootOutput)
+      endTimeCount CheckBody
       if [[ true != $tempInfo ]] {
         echo "exist Error when get active body"
         echo $tempInfo
@@ -412,17 +439,25 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
     }
 
     # 运行新的程序得到 log
-    echo "run  \"java -cp curMutant:$DacapoLib Harness $DacapoArg\"  to get coverage and log"
-    timeout $TIMEOUT"s" java -cp curMutant:$DacapoLib Harness "$DacapoArg" >run.log 2>&1
-    if (( $? == 124 )) {
+    startTimeCount
+    echo "run  \"java -cp curMutant:$BenchmarkLib Harness $BenchmarkArg\"  to get coverage and log"
+    timeout -s KILL $TIMEOUT"s" java -cp curMutant:$BenchmarkLib Harness "$BenchmarkArg" >run.log 2>&1
+    if (( $? == 137 )) {
+      endTimeCount RunMutant
       echo "Timeout! Remain $timeoutCount"
       timeoutCount=$((timeoutCount-1))
       continue
     }
-    echo "\"java -cp curMutant:$DacapoLib Harness $DacapoArg\"  done"
+    endTimeCount RunMutant
+    
+    # 转换 log，获取异常信息
+		startTimeCount
     java -cp $TOOL script.LogFormatter _DTJVM.log _DTJVM.log
+    endTimeCount LogFormatter
 
+    startTimeCount
     tempInfo=(${(ps:\n:)"$(java -cp $TOOL script.ExceptionSceneCoverage curMutant _DTJVM.log run.log)"})
+    endTimeCount ExceptionSceneCoverage
     curStructureNum=$tempInfo[1]
     curScenarioNum=$tempInfo[2]
     curStructures=$tempInfo[3]
@@ -440,23 +475,25 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
       echo "curStructureNum or curScenarioNum is zero"
       if [[ -f _DTJVM.log ]] {
         mv _DTJVM.log _DTJVM"Test"$curTestNum.log
-        mv curMutant $DacapoDir"Test"$curTestNum
+        mv curMutant $BenchmarkDir"Test"$curTestNum
         [[ -f run.log ]] && mv run.log runTest$curTestNum.log
-        echo "Fail. Saved as $DacapoDir"Test"$curTestNum in Epoch $epoch"
+        echo "Fail. Saved as $BenchmarkDir"Test"$curTestNum in Epoch $epoch"
         curTestNum=$((curTestNum + 1))
       }
       continue
     }
 
     # throw 和 catch 的覆盖率
+    startTimeCount
     java -cp $TOOL script.ThrowCatchCoverage curMutant _DTJVM.log
+    endTimeCount ThrowCatchCoverage
 
-    leaf=$(countLeaf $DacapoDir $curStructureNum)
+    leaf=$(countLeaf $BenchmarkDir $curStructureNum)
     mv _DTJVM.log _DTJVM$curStructureNum.$leaf.log
-    mv curMutant $DacapoDir$curStructureNum.$leaf
+    mv curMutant $BenchmarkDir$curStructureNum.$leaf
     [[ -f error.txt ]] && mv error.txt error$curStructureNum.$leaf.txt
     [[ -f run.log ]] && mv run.log run$curStructureNum.$leaf.log
-    echo "Finish combinators. Saved as $DacapoDir$curStructureNum.$leaf in Epoch $epoch"
+    echo "Finish combinators. Saved as $BenchmarkDir$curStructureNum.$leaf in Epoch $epoch"
 
     curSeedNum=$((curSeedNum+1))
     echo '-------------------------------------------------------------------------------'
@@ -465,6 +502,8 @@ for ((epoch = 1; epoch <= $EPOCH_NUM; ++epoch)) {
   cd .. # cd $epoch
 }
 
-cd .. # exit $DacapoArg"4"
+cd .. # exit $BenchmarkArg"4"
+
+printTimeCount # print time count for each item
 
 echo "Finish mutate4.sh"

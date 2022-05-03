@@ -38,11 +38,36 @@ for mutantsDir ($*) {
       java -cp $TOOL mutation.Uninstrument $dir
 
       # 运行最后生成的（可变异的）变种，看看其JVM覆盖率提升程度如何
-      timeout $TIMEOUT"s" $javaApp -cp sootOutput:$DacapoLib Harness "$DacapoArg" >/dev/null 2>&1
-      if [[ $? == 124 ]] {
+
+      # -Xmixed
+      timeout -s KILL $TIMEOUT"s" $javaApp -cp sootOutput:$DacapoLib Harness "$DacapoArg" >/dev/null 2>&1
+      if [[ $? == 137 ]] {
         echo "timeout!"
       }
-      rm -rf sootOutput scratch >/dev/null 2>&1
+      rm -rf scratch >/dev/null 2>&1
+
+      # "-Xint" 
+      timeout -s KILL $((TIMEOUT*3))"s" $javaApp -cp sootOutput:$DacapoLib -Xint Harness "$DacapoArg" >/dev/null 2>&1
+      if [[ $? == 137 ]] {
+        echo "timeout!"
+      }
+      rm -rf scratch >/dev/null 2>&1
+
+      # "-Xcomp" 
+      timeout -s KILL $((TIMEOUT*10))"s" $javaApp -cp sootOutput:$DacapoLib -Xcomp Harness "$DacapoArg" >/dev/null 2>&1
+      if [[ $? == 137 ]] {
+        echo "timeout!"
+      }
+      rm -rf scratch >/dev/null 2>&1
+
+      # "-noverify"
+      timeout -s KILL $TIMEOUT"s" $javaApp -cp sootOutput:$DacapoLib -noverify Harness "$DacapoArg" >/dev/null 2>&1
+      if [[ $? == 137 ]] {
+        echo "timeout!"
+      }
+      rm -rf scratch >/dev/null 2>&1
+
+      rm -rf sootOutput >/dev/null 2>&1
     }
 
     cd .. # cd $num
@@ -58,13 +83,32 @@ for mutantsDir ($*) {
   # 获取这一行输出的覆盖率并通过 echo 返回
   lineCov=$(echo $covInfo | grep lines)
   funcCov=$(echo $covInfo | grep functions)
+  branCov=$(echo $covInfo | grep branches)
   lineCov=${lineCov%\%*} # 去除 % 及其右边的字符
   lineCov=${lineCov#*\:} # 去除 : 及其左边的字符
   funcCov=${funcCov%\%*}
   funcCov=${funcCov#*\:}
-  echo "$mutantsDir total lineCov: $lineCov, funcCov: $funcCov" 
+  branCov=${branCov%\%*}
+  branCov=${branCov#*\:}
+  echo "$mutantsDir total lineCov: $lineCov, funcCov: $funcCov, branCov: $branCov" 
+
+  # 用这条命令过滤出需要的文件夹：
+  covInfo=$(filterInfo coverage.info coverage.filter.info)
 
   genhtml coverage.info --output-directory lcov_report --ignore-errors source >/dev/null 2>&1
+  genhtml coverage.filter.info --output-directory lcov_filter_report --ignore-errors source >/dev/null 2>&1
+
+  # 获取这一行输出的覆盖率并通过 echo 返回
+  lineCov=$(echo $covInfo | grep lines)
+  funcCov=$(echo $covInfo | grep functions)
+  branCov=$(echo $covInfo | grep branches)
+  lineCov=${lineCov%\%*} # 去除 % 及其右边的字符
+  lineCov=${lineCov#*\:} # 去除 : 及其左边的字符
+  funcCov=${funcCov%\%*}
+  funcCov=${funcCov#*\:}
+  branCov=${branCov%\%*}
+  branCov=${branCov#*\:}
+  echo "$mutantsDir part lineCov: $lineCov, funcCov: $funcCov, branCov: $branCov" 
 
   echo "==========================="
 
