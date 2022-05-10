@@ -3,53 +3,54 @@ This repository contains scripts and jar for running EHCBuilder and EHCRandom.
 # Files Tree
 
 ```
-├── README.md
+├── experiments
+│   ├── dacapo
+│   │   ├── config.sh
+│   │   ├── ehcbuilder-jar-with-dependencies.jar
+│   │   ├── getJVMCov.sh
+│   │   ├── getThrowCatchCoverage.sh
+│   │   └── runOnJVMs.sh
+│   └── scimark2
+│       ├── config.sh
+│       ├── ehcbuilder-jar-with-dependencies.jar
+│       ├── getJVMCov.sh
+│       ├── getThrowCatchCov.sh
+│       └── runOnJVMs.sh
 ├── fuzzer
 │   ├── dacapo
-│   │		├── dacapo0/
-│   │		├── dacapo0_unins/
-│   │		├── jar/
-│   │		├── ehcbuilder-jar-with-dependencies.jar
-│   │       ├── _DTJVMavrora.log
-│   │       ├── _DTJVMbatik.log
-│   │       ├── _DTJVMeclipse.log
-│   │       ├── _DTJVMfop.log
-│   │       ├── _DTJVMh2.log
-│   │       ├── _DTJVMjython.log
-│   │       ├── _DTJVMluindex.log
-│   │       ├── _DTJVMpmd.log
-│   │       ├── _DTJVMsunflow.log
-│   │       ├── _DTJVMtradebeans.log
-│   │       ├── _DTJVMtradesoap.log
-│   │       ├── _DTJVMxalan.log
-│   │		├── config.sh
-│   │		├── ehcrandom.sh
-│   │		├── ehcbuilder.sh
-│   │		├── ehcbuilder_opt.sh
-│   │		└── id-class-method.txt
+│   │   ├── config.sh
+│   │   ├── dacapo0
+│   │   ├── dacapo_unins
+│   │   ├── _DTJVMavrora.log
+│   │   ├── _DTJVMbatik.log
+│   │   ├── _DTJVMeclipse.log
+│   │   ├── _DTJVMfop.log
+│   │   ├── _DTJVMh2.log
+│   │   ├── _DTJVMjython.log
+│   │   ├── _DTJVMluindex.log
+│   │   ├── _DTJVMpmd.log
+│   │   ├── _DTJVMsunflow.log
+│   │   ├── _DTJVMtradebeans.log
+│   │   ├── _DTJVMtradesoap.log
+│   │   ├── _DTJVMxalan.log
+│   │   ├── ehcbuilder-jar-with-dependencies.jar
+│   │   ├── ehcbuilder_opt.sh
+│   │   ├── ehcbuilder.sh
+│   │   ├── ehcrandom.sh
+│   │   ├── id-class-method.txt
+│   │   └── jar
 │   └── scimark2
-│   		├── scimark0/
-│   		├── scimark_unins/
-│   		├── ehcbuilder-jar-with-dependencies.jar
-│   		├── _DTJVM0.log
-│   		├── config.sh
-│   		├── ehcrandom.sh
-│   		├── ehcbuilder.sh
-│   		├── ehcbuilder_opt.sh
-│   		└── id-class-method.txt
-└── experiments
-    ├── dacapo
-    │		├── config.sh
-    │		├── ehcbuilder-jar-with-dependencies.jar
-    │		├── getJVMCov.sh
-    │		├── getThrowCatchCoverage.sh
-    │		└── runOnJVMs.sh
-    └── scimark2
-    		├── config.sh
-    		├── ehcbuilder-jar-with-dependencies.jar
-    		├── getJVMCov.sh
-    		├── getThrowCatchCoverage.sh
-    		└── runOnJVMs.sh
+│       ├── config.sh
+│       ├── _DTJVM0.log
+│       ├── ehcbuilder-jar-with-dependencies.jar
+│       ├── ehcbuilder_opt.sh
+│       ├── ehcbuilder.sh
+│       ├── ehcrandom.sh
+│       ├── id-class-method.txt
+│       ├── scimark0
+│       └── scimark_unins
+└── README.md
+
 ```
 
 * fuzzer: contains all fuzzer (EHCRandom, EHCBuilder, EHCBuilder with optimization). 
